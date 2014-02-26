@@ -10,6 +10,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SteamTags
@@ -18,12 +19,10 @@ namespace SteamTags
 	{
 		static void Main(string[] args)
 		{
-			//if (args.Length < 2) return;
+			if (args.Length < 2) return;
 			var p = new Program();
-			//var game = args.Skip(1).Aggregate((a, b) => a + " " + b);
-			//var target = args[0];
-			var target = @"D:\temp\ross.txt";
-			var game = "sonic";
+			var game = args.Skip(1).Aggregate((a, b) => a + " " + b);
+			var target = args[0];
 			var work = Task.Factory.StartNew(() =>
 			{
 				var info = p.GetGameInfo(game);
@@ -47,12 +46,14 @@ namespace SteamTags
 			}).ContinueWith((t) => { p.Log(t.Exception.Flatten().ToString()); }, TaskContinuationOptions.OnlyOnFaulted);
 			try
 			{
-				work.Wait((int)(TimeSpan.FromSeconds(8.0).TotalMilliseconds));
+				work.Wait(TimeSpan.FromSeconds(18.0));
 			}
+			catch (TaskCanceledException) { }
 			catch (Exception ex)
 			{
 				p.Log(ex.ToString());
 			}
+			Thread.Sleep(400);
 		}
 
 		private void Log(string s)
